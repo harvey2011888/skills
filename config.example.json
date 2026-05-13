@@ -1,0 +1,25 @@
+{
+  "report_type": "weekly",
+  "git_repo_path": ".",
+  "include_git": true,
+  "include_tasks": true,
+  "include_documents": true,
+  "output_format": "markdown",
+  "language": "zh",
+  "author_name": "你的名字",
+  "team_name": "你的团队",
+  "highlights": [
+    "完成了核心功能模块的开发",
+    "优化了系统性能，响应速度提升 50%",
+    "解决了长期存在的技术债务问题"
+  ],
+  "challenges": [
+    "某个技术难点需要进一步研究",
+    "跨团队协作沟通成本较高"
+  ],
+  "plans": [
+    "继续推进 XX 功能的开发",
+    "准备技术分享：XXX 主题",
+    "优化代码质量，提升测试覆盖率"
+  ]
+}
