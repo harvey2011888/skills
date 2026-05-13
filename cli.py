@@ -8,7 +8,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from weekly_report_generator import ReportGenerator, ReportConfig
+from weekly_report_generator import ReportGenerator, ReportConfig, GitAuthConfig
 
 
 def main():
@@ -77,7 +77,57 @@ def main():
         help="团队名称"
     )
     
+    parser.add_argument(
+        "--private-repo",
+        action="store_true",
+        help="访问私有仓库"
+    )
+    
+    parser.add_argument(
+        "--auth-type",
+        choices=["ssh", "token", "https"],
+        default="ssh",
+        help="认证方式：ssh, token, https"
+    )
+    
+    parser.add_argument(
+        "--token",
+        help="Git Token（用于私有仓库认证）"
+    )
+    
+    parser.add_argument(
+        "--username",
+        help="Git 用户名"
+    )
+    
+    parser.add_argument(
+        "--password",
+        help="Git 密码"
+    )
+    
+    parser.add_argument(
+        "--ssh-key",
+        help="SSH Key 文件路径"
+    )
+    
+    parser.add_argument(
+        "--remote-url",
+        help="远程仓库 URL"
+    )
+    
     args = parser.parse_args()
+    
+    # 配置 Git 认证
+    git_auth = None
+    if args.private_repo or args.token or args.username or args.ssh_key:
+        git_auth = GitAuthConfig(
+            auth_type=args.auth_type,
+            token=args.token,
+            username=args.username,
+            password=args.password,
+            ssh_key_path=args.ssh_key,
+            remote_url=args.remote_url
+        )
     
     config = ReportConfig(
         report_type=args.type,
@@ -88,7 +138,9 @@ def main():
         include_tasks=not args.no_tasks,
         include_documents=not args.no_docs,
         author_name=args.author or "",
-        team_name=args.team or ""
+        team_name=args.team or "",
+        git_auth=git_auth,
+        private_repo=args.private_repo
     )
     
     if args.config:

@@ -24,6 +24,7 @@ category: 效率提升
 - **文档变更追踪** - 追踪技术文档、API 文档、README 等的更新情况
 - **智能分类汇总** - 自动分类整理工作内容，生成结构化报告
 - **灵活配置** - 支持周报/月报、自定义日期范围、个性化模板
+- **私有仓库支持** - 支持 SSH、Token、HTTPS 等多种认证方式
 - **零依赖** - 仅使用 Python 标准库，开箱即用
 
 ## 使用场景
@@ -67,6 +68,12 @@ python cli.py --start-date 2026-05-01 --end-date 2026-05-31
 
 # 使用配置文件
 python cli.py --config config.json --output report.md
+
+# 访问私有仓库（Token 方式）
+python cli.py --private-repo --token "ghp_xxx" --remote-url "https://github.com/user/repo.git"
+
+# 访问私有仓库（SSH 方式）
+python cli.py --private-repo --ssh-key ~/.ssh/id_rsa
 ```
 
 ### 方式三：Python 代码调用
@@ -125,6 +132,8 @@ with open("weekly_report.md", "w", encoding="utf-8") as f:
 
 ### 参数说明
 
+#### 基础参数
+
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | `report_type` | string | "weekly" | 报告类型：weekly(周报) 或 monthly(月报) |
@@ -137,6 +146,61 @@ with open("weekly_report.md", "w", encoding="utf-8") as f:
 | `highlights` | array | [] | 工作亮点列表 |
 | `challenges` | array | [] | 遇到的挑战列表 |
 | `plans` | array | [] | 下阶段计划列表 |
+
+#### 私有仓库参数（可选）
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `private_repo` | boolean | false | 是否访问私有仓库 |
+| `git_auth` | object | null | Git 认证配置 |
+| `git_auth.auth_type` | string | "ssh" | 认证方式：ssh, token, https |
+| `git_auth.token` | string | null | Personal Access Token |
+| `git_auth.username` | string | null | Git 用户名 |
+| `git_auth.password` | string | null | Git 密码 |
+| `git_auth.ssh_key_path` | string | null | SSH Key 文件路径 |
+| `git_auth.remote_url` | string | null | 远程仓库 URL |
+
+## 私有仓库配置
+
+如果你的代码在私有仓库中，需要配置认证信息。
+
+### 配置示例（Token 方式）
+
+```json
+{
+  "private_repo": true,
+  "git_auth": {
+    "auth_type": "token",
+    "token": "ghp_xxxxxxxxxxxxxxxxxxxx",
+    "remote_url": "https://github.com/username/private-repo.git"
+  }
+}
+```
+
+### 配置示例（SSH 方式）
+
+```json
+{
+  "private_repo": true,
+  "git_auth": {
+    "auth_type": "ssh",
+    "ssh_key_path": "/Users/yourname/.ssh/id_rsa",
+    "remote_url": "git@github.com:username/private-repo.git"
+  }
+}
+```
+
+### 命令行使用
+
+```bash
+# Token 方式
+python cli.py --private-repo --token "ghp_xxx" --remote-url "https://github.com/user/repo.git"
+
+# SSH 方式
+python cli.py --private-repo --ssh-key ~/.ssh/id_rsa
+```
+
+**详细说明**：请查看 [私有仓库配置指南.md](私有仓库配置指南.md)
 
 ## 任务文件格式
 

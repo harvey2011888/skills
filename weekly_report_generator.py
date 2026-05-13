@@ -42,6 +42,17 @@ class DocumentChange:
 
 
 @dataclass
+class GitAuthConfig:
+    """Git 认证配置"""
+    auth_type: str = "ssh"  # ssh, https, token
+    token: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    ssh_key_path: Optional[str] = None
+    remote_url: Optional[str] = None
+
+
+@dataclass
 class ReportConfig:
     report_type: str = "weekly"
     start_date: Optional[str] = None
@@ -55,14 +66,89 @@ class ReportConfig:
     highlights: List[str] = field(default_factory=list)
     challenges: List[str] = field(default_factory=list)
     plans: List[str] = field(default_factory=list)
+    git_auth: Optional[GitAuthConfig] = None
+    private_repo: bool = False
 
 
 class GitExtractor:
-    def __init__(self, repo_path: str = "."):
+    def __init__(self, repo_path: str = ".", auth_config: Optional[GitAuthConfig] = None):
         self.repo_path = repo_path
+        self.auth_config = auth_config
+        self._setup_auth()
+    
+    def _setup_auth(self):
+        """配置 Git 认证"""
+        if not self.auth_config:
+            return
+        
+        try:
+            if self.auth_config.auth_type == "ssh" and self.auth_config.ssh_key_path:
+                self._setup_ssh_auth()
+            elif self.auth_config.auth_type == "token" and self.auth_config.token:
+                self._setup_token_auth()
+            elif self.auth_config.auth_type == "https" and self.auth_config.username and self.auth_config.password:
+                self._setup_https_auth()
+        except Exception as e:
+            print(f"⚠️  Git 认证配置失败：{e}")
+    
+    def _setup_ssh_auth(self):
+        """配置 SSH 认证"""
+        ssh_key = self.auth_config.ssh_key_path
+        if ssh_key and os.path.exists(ssh_key):
+            os.environ["GIT_SSH_COMMAND"] = f"ssh -i {ssh_key} -o IdentitiesOnly=yes"
+    
+    def _setup_token_auth(self):
+        """配置 Token 认证"""
+        token = self.auth_config.token
+        if token:
+            os.environ["GIT_ASKPASS"] = "/bin/echo"
+            if self.auth_config.remote_url:
+                self._update_remote_url(token)
+    
+    def _setup_https_auth(self):
+        """配置 HTTPS 认证"""
+        username = self.auth_config.username
+        password = self.auth_config.password
+        if username and password:
+            credential_helper = f"!f() {{ test \"$1\" = username && echo {username} || echo {password}; }}; f"
+            os.environ["GIT_ASKPASS"] = "/bin/echo"
+            if self.auth_config.remote_url:
+                self._update_remote_url_with_auth(username, password)
+    
+    def _update_remote_url(self, token: str):
+        """使用 token 更新远程仓库 URL"""
+        try:
+            if self.auth_config.remote_url:
+                new_url = self.auth_config.remote_url.replace("https://", f"https://{token}@")
+                subprocess.run(
+                    ["git", "-C", self.repo_path, "remote", "set-url", "origin", new_url],
+                    capture_output=True,
+                    check=False
+                )
+        except Exception:
+            pass
+    
+    def _update_remote_url_with_auth(self, username: str, password: str):
+        """使用用户名密码更新远程仓库 URL"""
+        try:
+            if self.auth_config.remote_url:
+                new_url = self.auth_config.remote_url.replace(
+                    "https://", 
+                    f"https://{username}:{password}@"
+                )
+                subprocess.run(
+                    ["git", "-C", self.repo_path, "remote", "set-url", "origin", new_url],
+                    capture_output=True,
+                    check=False
+                )
+        except Exception:
+            pass
     
     def get_commits(self, start_date: str, end_date: str) -> List[GitCommit]:
         try:
+            if self.private_repo and self.auth_config:
+                self._ensure_auth_setup()
+            
             cmd = [
                 "git", "-C", self.repo_path, "log",
                 f"--since={start_date}",
@@ -73,9 +159,30 @@ class GitExtractor:
             ]
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             return self._parse_git_log(result.stdout)
-        except Exception as e:
-            print(f"Git 命令执行失败：{e}")
+        except subprocess.CalledProcessError as e:
+            error_msg = str(e.stderr) if e.stderr else str(e)
+            if "authentication failed" in error_msg.lower() or "could not read username" in error_msg.lower():
+                print(f"❌ Git 认证失败：请检查私有仓库认证配置")
+                print(f"   错误信息：{error_msg}")
+                print(f"   解决方案：")
+                print(f"     1. 使用 SSH 方式：配置 SSH Key")
+                print(f"     2. 使用 Token 方式：生成 Personal Access Token")
+                print(f"     3. 使用 HTTPS 方式：确保用户名密码正确")
+            elif "repository not found" in error_msg.lower():
+                print(f"❌ 无法访问私有仓库：{self.repo_path}")
+                print(f"   请确认仓库路径正确且有访问权限")
+            else:
+                print(f"Git 命令执行失败：{error_msg}")
             return []
+        except Exception as e:
+            print(f"Git 操作异常：{e}")
+            return []
+    
+    def _ensure_auth_setup(self):
+        """确保认证已配置"""
+        if not self.auth_config:
+            print("⚠️  访问私有仓库需要配置认证信息")
+            print("   请在配置文件中添加 git_auth 配置")
     
     def _parse_git_log(self, log_output: str) -> List[GitCommit]:
         commits = []
@@ -258,7 +365,7 @@ class DocumentChangeTracker:
 class ReportGenerator:
     def __init__(self, config: ReportConfig):
         self.config = config
-        self.git_extractor = GitExtractor(config.git_repo_path)
+        self.git_extractor = GitExtractor(config.git_repo_path, config.git_auth)
         self.task_extractor = TaskExtractor()
         self.doc_tracker = DocumentChangeTracker(config.git_repo_path)
     
