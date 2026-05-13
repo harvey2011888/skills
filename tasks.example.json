@@ -1,0 +1,33 @@
+{
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "实现用户登录功能",
+      "status": "completed",
+      "priority": "high",
+      "description": "完成用户登录、注册、密码找回等功能",
+      "completed_date": "2026-05-10"
+    },
+    {
+      "id": "TASK-002",
+      "title": "优化数据库查询性能",
+      "status": "completed",
+      "priority": "medium",
+      "description": "对慢查询进行优化，添加必要的索引"
+    },
+    {
+      "id": "TASK-003",
+      "title": "编写 API 文档",
+      "status": "pending",
+      "priority": "low",
+      "description": "完善 REST API 接口文档"
+    },
+    {
+      "id": "TASK-004",
+      "title": "代码审查与重构",
+      "status": "pending",
+      "priority": "medium",
+      "description": "对核心模块进行代码审查和技术债务清理"
+    }
+  ]
+}
