@@ -33,6 +33,9 @@ ENV/
 *.swo
 *~
 
+# SOLO / Trae internal files
+.trae/
+
 # OS
 .DS_Store
 Thumbs.db
