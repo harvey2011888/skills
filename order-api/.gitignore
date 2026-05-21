@@ -1,0 +1,59 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Test and logs
+test/
+log/
+logs/
+*.log
+
+# Config and environment
+hubbuy.json
+.env
+.env.local
+.env.*.local
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Build output
+hubbuy-api
+build/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Go workspace
+go.work
+go.work.sum
+
+# Dependency directory (if using vendor, commit it; otherwise ignore)
+# vendor/
+
+# Coverage
+coverage.out
+coverage/
+
+# Binary executable
+order-api
+*.exe
