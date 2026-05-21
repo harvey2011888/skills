@@ -4,7 +4,46 @@
 
 ## 📦 包含的 Skills
 
+### Windows C 盘清理 🆕
+
+**目录**: [windows-cleaner/](windows-cleaner/)
+
+智能扫描和清理 Windows 系统 C 盘的临时文件、缓存、日志等，先列出可清理项目供用户选择，确认后执行并生成清理报告。支持 Win7 / Win8 / Win8.1 / Win10 / Win11。
+
+#### 核心特性
+- 🔍 智能扫描 - 覆盖 20+ 种清理项（临时文件、更新缓存、浏览器缓存、系统转储等）
+- 🛡️ 安全清理 - 内置白名单保护，自动跳过 System32 等关键系统目录
+- 📋 交互式选择 - 扫描后列出清单，用户选择要清理的项目后才执行
+- 📊 详细报告 - 清理前后对比、成功/失败明细，一目了然
+- 🌐 全版本兼容 - 支持 Win7 / Win8 / Win8.1 / Win10 / Win11
+- 📦 零依赖 - 仅使用 Python 标准库，开箱即用
+
+#### 快速开始
+
+```bash
+# 进入目录
+cd windows-cleaner
+
+# 扫描可清理项目
+python src/cli.py --scan
+
+# 交互式选择清理
+python src/cli.py --interactive
+
+# 清理所有安全项目
+python src/cli.py --clean-all
+```
+
+#### 项目统计
+- **代码行数**: 760 行（核心代码 + CLI）
+- **清理项数**: 20+ 种常见占用空间项目
+- **浏览器覆盖**: 16 款浏览器（Chrome/Edge/Firefox/360/QQ/搜狗/微信等）
+- **依赖**: 零依赖（仅使用 Python 标准库）
+
+---
+
 ### 周报/月报自动生成器
+
 **目录**: [weekly-report-generator/](weekly-report-generator/)
 
 从 Git 提交记录、任务系统、文档变更中提取工作成果，自动生成结构化周报/月报。
@@ -38,6 +77,10 @@ cat weekly-report-generator/README.md
 
 ## 📚 文档导航
 
+### Windows C 盘清理
+- [README](windows-cleaner/README.md) - 项目总览
+- [SKILL](windows-cleaner/SKILL.md) - SOLO Skill 交互流程说明
+
 ### 周报/月报自动生成器
 - [README](weekly-report-generator/README.md) - 项目总览
 - [快速上手](weekly-report-generator/docs/QUICKSTART.md) - 5 分钟快速上手
@@ -50,6 +93,14 @@ cat weekly-report-generator/README.md
 
 ```
 .
+├── windows-cleaner/                  # Windows C 盘清理工具 🆕
+│   ├── SKILL.md                     # SOLO Skill 定义
+│   ├── README.md                    # 项目文档
+│   ├── src/                         # 源代码
+│   │   ├── windows_cleaner.py       # 核心清理逻辑
+│   │   ├── cli.py                   # 命令行入口
+│   │   └── __init__.py              # 包初始化
+│   └── test_cleaner.py              # 测试脚本
 ├── weekly-report-generator/          # 周报/月报自动生成器
 │   ├── SKILL.md                     # SOLO Skill 定义
 │   ├── README.md                    # 项目文档
